@@ -9,24 +9,34 @@
 import UIKit
 // resource url https://api.twitter.com/1.1/statuses/home_timeline.json
 
-class NotificationTableTableViewController: UITableViewController {
+class HomeTableViewController: UITableViewController {
     
     var tweetArray = [NSDictionary]()
     var numberOfTweet: Int!
-    
     let myRefreshControl = UIRefreshControl()
+    var favorited:Bool = false
+    var tweetId = -1
+    let myUrl = "https://api.twitter.com/1.1/statuses/home_timeline.json"
+    //let myUrl = "https://api.twitter.com/1.1/statuses/user_timeline.json"
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.loadTweet()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         loadTweet()
         myRefreshControl.addTarget(self, action: #selector(loadTweet), for: .valueChanged)
         self.tableView.refreshControl = myRefreshControl
+        self.tableView.rowHeight = UITableView.automaticDimension
+        self.tableView.estimatedRowHeight = 150
     }
     
     @objc func loadTweet(){
         numberOfTweet = 20
-        let myUrl = "https://api.twitter.com/1.1/statuses/home_timeline.json"
         let myParams = ["count":numberOfTweet]
-        TwitterAPICaller.client?.getDictionariesRequest(url: myUrl, parameters: myParams, success: { (tweetRawData: [NSDictionary]) in
+        TwitterAPICaller.client?.getDictionariesRequest(url: self.myUrl, parameters: myParams, success: { (tweetRawData: [NSDictionary]) in
             self.tweetArray.removeAll()
             for tweet in tweetRawData{
                 self.tweetArray.append(tweet)
@@ -40,11 +50,10 @@ class NotificationTableTableViewController: UITableViewController {
     }
     
         func loadMoreTweets(){
-            let myUrl = "https://api.twitter.com/1.1/statuses/home_timeline.json"
             numberOfTweet = numberOfTweet + 10
             let myParams = ["count":numberOfTweet]
     
-            TwitterAPICaller.client?.getDictionariesRequest(url: myUrl, parameters: myParams, success: { (tweetRawData: [NSDictionary]) in
+            TwitterAPICaller.client?.getDictionariesRequest(url: self.myUrl, parameters: myParams, success: { (tweetRawData: [NSDictionary]) in
                 self.tweetArray.removeAll()
                 for tweet in tweetRawData{
                     self.tweetArray.append(tweet)
@@ -59,7 +68,7 @@ class NotificationTableTableViewController: UITableViewController {
                 loadMoreTweets()
             }
         }
-    
+
     @IBAction func onLogout(_ sender: Any) {
     
         TwitterAPICaller.client?.logout()
@@ -86,10 +95,6 @@ class NotificationTableTableViewController: UITableViewController {
         // #warning Incomplete implementation, return the number of rows
         return tweetArray.count
     }
-
-   
-
- 
-
-
+    
+    
 }
